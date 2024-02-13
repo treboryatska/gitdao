@@ -35,6 +35,8 @@ ZZ                        2          2.00       0.01
 
 The idea is that the DAO is the owner of the repository. The `% of total points` are the `%` of your ownership of the DAO.
 
+This information will be refreshed every a certain period of time (for example, every month or every release) and the DAO will distribute the tokens to the contributors based on their contribution on the main branch.
+
 ## Weighted Points
 
 The points are calculated as follows:
