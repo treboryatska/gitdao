@@ -2,7 +2,7 @@
 
 *WORK IN PROGRESS*
 
-Contributors of a Git repository can be the owners of the repostitory.
+Contributors of a Git repository can be the owners of the repository.
 
 GitDAO is a tool that calculates the contribution of each member of a Git repository based on the lines of code they have written with a weighted score. (for example, comments are worth half a point).
 
@@ -32,6 +32,8 @@ dan                       29         29.00      0.08
 Idr                       1062       1062.00    2.94              
 ZZ                        2          2.00       0.01     
 ```
+
+The idea is that the DAO is the owner of the repository. The % of total points are the % of your ownership of the DAO.
 
 ## Weighted Points
 
