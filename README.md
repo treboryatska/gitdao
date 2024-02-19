@@ -61,7 +61,7 @@ One created you should see something like this:
 
 4. Create a Secure document that will contain the Github account's login, credentials, recovery coes and any other revelant information.
 
-5. Encrypt this document with GPG or another tool and upload it to IPFS, any other shared location or even the Github repositor itself. Share the location with the DAO members.
+5. Encrypt this document with GPG or another tool and upload it to IPFS, any other shared location or even the Github repository itself. Share the location with the DAO members.
 
 6. Whenever access to the GitHub account is needed (for example, to update credentials or to perform critical actions), a proposal is created within the DAO's governance platform, specifying the reason for access.
 
