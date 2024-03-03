@@ -1,20 +1,59 @@
 # gitdao
 
-*WORK IN PROGRESS*
+*WORK IN PROGRESS - ALPHA STAGE*  
 
-Gitdao allows contributors of a Git repository yo be the owners of the repository using a DAO.
+Gitdao allows contributors of a Git repository to be the owners of the repository using a DAO.
 
-GitDAO is a tool that calculates the contribution of each member of a Git repository based on the lines of code they have written with a weighted score. (for example, comments are worth half a point).
+GitDAO's CPC (Contributor's Points Calculator) is a tool that calculates the contribution of each member of a Git repository based on the lines of code they have written with a weighted score. (for example, comments are worth half a point).
 
 The goal is to use this tool to calculate the contribution of each member and give them a share of the DAO's tokens based on their contribution.
 
 In the future a Github user could login the DAO dashboard using only their Github account using zklogin.
 
-## How to use
+
+## Architecture design
+
+
+Design of the architecture of the system ([link to edit](https://mermaid.live/edit#pako:eNp1Uk1vgzAM_StWdm136a2bOiHQpB3aVbRSNUEPKTGFDRKUD1UT7X9fEqBlU8eBOM_P9rPjlmSCIZmTo6RNAdvoKeVgv6Bd4QlibMTLpUNW8e41GUDY4QFyIet9T4_DJDBa1FSXWccIJVItJEydc6BFY1oUvI9Z0cBaztbJknJDK5hJBg2VukQF4sRRqqJsQEvKVY5yyArT6eL8gersRY7BlTi78leRHgzWb2dX7tbXHdgaDnViUt5B4TpMQsG1LA_GaV6LkmsFIa0yU_kung9yYbunTMEjo2JEVvtrDl9skxXITIUMYsOt8DAsKD-i6ln9re3Py2_42prNdsfjJ-HFBezTKF0j1zeRXcC_7sR74Ob6299wtcUeQOSgxRdyZQ-obeDez8wa_VNaK3E_cJvTUfd-rtv-DTvecEsGY8wnE1KjrGnJ7J62LiAlusAaUzK3JsOcmkqnJOUXS6V23JtvnpG5lgYnxDTMio1Kaje8JvOcVgovP9ja-RY)):
+
+```mermaid
+graph TD;
+    A{New Repo?}
+    NRWF[New Repo Web form]
+    ARC[Automatic Repo Creator - ARC]
+    ADC[Automatic DAO Creator - ADC]
+    M3P[Manual 3rd parties ownership transfer]
+    A -->|Yes| NRWF
+    A -->|No| ARC
+    ARC -->|API| ADC
+    NRWF -->|API| ADC
+    ADC --> M3P
+
+    CPC[Contributor Points Calculator <br> Reads .daoContributors]
+    CPC -->|Scheduled Runs| CChanges
+    CChanges{Changes}
+    CChanges -->|No| CPC
+    CChanges -->|Yes| PointAdjustmentCalculator
+    PointAdjustmentCalculator[Point Adjustment Calculator <br>Calculates # of tokens to mint]--> Mint
+    Mint[Mint New tokens] --> Transfer
+    Transfer[Transfer New tokens]
+```
+
+New contributors and therefore ownwer will come over the repository, so we need a way for Github users to link there public keys to that user. For this we would have to create a `daocontributors.txt` file in the root of the repository. This file will have a content like:
+
+```
+Min 0x327a12059118e599059f432f238B54090c5bDC2D
+Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
+```
+
+Note: We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transfered between users. So CPC will check the balance of all address linked to that user. (*pending to improve*)
+
+
+## How to use GitDAO's CPC
 
 Use with:
 
-`python3 gitdao.py <path-to-a-git-repo>`
+`python3 cpc.py <path-to-a-git-repo>`
 
 Output will be something like this:
 
@@ -30,8 +69,15 @@ Léo3                      645        638.50     1.77
 Alejandro                 14         8.50       0.02              
 dan                       29         29.00      0.08              
 Idr                       1062       1062.00    2.94              
-ZZ                        2          2.00       0.01     
+ZZ                        2          2.00       0.01   
+
+Author                    Address               % of Total Points  % of Claimed Points
+-----------------------------------------------------------------------------------------------------
+leo          0x327a12059118e599059f432f238B54090c5bDC2D 0.20               97.26             
+ZZ           0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4 0.01               2.74   
 ```
+
+
 
 The idea is that the DAO is the owner of the repository. The `% of total points` are the `%` of your ownership of the DAO.
 

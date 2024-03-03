@@ -53,6 +53,35 @@ def count_lines_and_points_by_author(file_list):
             print(f"Skipping file due to error: {file}")
     return author_stats
 
+def read_dao_contributors(file_path='daoContributors.txt'):
+    """Read the daoContributors.txt file and return a mapping of author names to blockchain addresses."""
+    if not os.path.exists(file_path):
+        return None
+
+    contributors = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            parts = line.strip().split(maxsplit=1)
+            if len(parts) == 2:
+                contributors[parts[0]] = parts[1]  # Use full names as provided
+    return contributors
+
+def print_contributors_table(contributors, author_stats, total_points):
+    """Print the table of contributors with blockchain addresses and '% of Claimed Points', for those listed in the daoContributors file."""
+    # Calculate total points for contributors in the daoContributors file
+    total_contributor_points = sum(author_stats[author]['points'] for author in contributors if author in author_stats)
+
+    print(f"\n{'Author':<25} {'Address':<42} {'% of Total Points':<18} {'% of Claimed Points':<18}")
+    print('-' * 115)
+    for author, address in contributors.items():
+        if author in author_stats:
+            stats = author_stats[author]
+            percentage_of_total = (stats['points'] / total_points) * 100 if total_points > 0 else 0
+            percentage_of_claimed = (stats['points'] / total_contributor_points) * 100 if total_contributor_points > 0 else 0
+            print(f"{author:<25} {address:<42} {percentage_of_total:<18.2f} {percentage_of_claimed:<18.2f}")
+
+
+
 def main(repo_path):
     os.chdir(repo_path)
     files = get_git_files()
@@ -61,18 +90,23 @@ def main(repo_path):
     # Calculate the total points contributed by all authors
     total_points = sum(stats['points'] for stats in author_stats.values())
 
-    # Print the table header
+    # Print the original table
     print(f"{'Author':<25} {'Lines':<10} {'Points':<10} {'% of Total Points':<18}")
     print('-' * 65)
-
-    # Display the line count, total points, and percentage of total points for each author in a table format
     for author, stats in author_stats.items():
         percentage_of_total = (stats['points'] / total_points) * 100 if total_points > 0 else 0
         print(f"{author:<25} {stats['lines']:<10} {stats['points']:<10.2f} {percentage_of_total:<18.2f}")
 
+    # Attempt to read the daoContributors file and print the corresponding table or error message
+    contributors = read_dao_contributors()
+    if contributors is not None:
+        print_contributors_table(contributors, author_stats, total_points)
+    else:
+        print("\ndaoContributors file not found. Please add one.")
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Analyze Git repository contributions with valuation, including text files and comments.')
+    parser = argparse.ArgumentParser(description='Analyze Git repository contributions with valuation, including text files and comments, and map to blockchain addresses.')
     parser.add_argument('repo_path', type=str, help='Path to the Git repository')
     args = parser.parse_args()
 
