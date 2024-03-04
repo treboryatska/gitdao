@@ -46,25 +46,33 @@ Design of the architecture of the system ([link to edit](https://mermaid.live/ed
 
 ```mermaid
 graph TD;
-    A{New Repo?}
+graph TD;
+    FE(Front End Form or API)
+    Q1{New Repo?}
     NRWF[New Repo Web form]
-    ARC[Automatic Repo Creator - ARC]
-    ADC[Automatic DAO Creator - ADC]
+    ARC[[Automatic Repo Creator - ARC]]
+    ADC[[Automatic DAO Creator - ADC]]
     M3P[Manual 3rd parties ownership transfer]
-    A -->|Yes| NRWF
-    A -->|No| ARC
+
+    FE[Front End Form or API] --> Q1
+    Q1 -->|Yes| NRWF
+    Q1 -->|No| ARC
     ARC -->|API| ADC
     NRWF -->|API| ADC
     ADC --> M3P
 
-    CPC[Contributor Points Calculator <br> Reads daoContributors.txt]
+    CPC[[Contributor Points Calculator]]
     CPC -->|Scheduled Runs| CChanges
     CChanges{Changes}
     CChanges -->|No| CPC
     CChanges -->|Yes| PointAdjustmentCalculator
-    PointAdjustmentCalculator[Point Adjustment Calculator <br>Calculates # of tokens to mint]--> Mint
+    PointAdjustmentCalculator[[Point Adjustment Calculator <br>calculates # of tokens to mint]]--> Mint
     Mint[Mint New tokens] --> Transfer
     Transfer[Transfer New tokens]
+
+    CPC -->|Reads| daoContributors
+    daoContributors>"daoContributors.txt"]
+
 ```
 
 New contributors and therefore ownwer will come over the repository, so we need a way for Github users to link there public keys to that user. For this we would have to create a `daocontributors.txt` file in the root of the repository. This file will have a content like:
