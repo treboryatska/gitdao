@@ -1,15 +1,43 @@
 # gitdao
 
-*WORK IN PROGRESS - ALPHA STAGE*  
+*WORK IN PROGRESS - DESIGN STAGE*  
 
 Gitdao allows contributors of a Git repository to be the owners of the repository using a DAO.
 
-GitDAO's CPC (Contributor's Points Calculator) is a tool that calculates the contribution of each member of a Git repository based on the lines of code they have written with a weighted score. (for example, comments are worth half a point).
+The goal is to extend this functionality so the the DAO can control all aspects of an open source project, including the repository, the website, the social media accounts, the domain, the CI/CD, the funding, the governance, etc.
 
-The goal is to use this tool to calculate the contribution of each member and give them a share of the DAO's tokens based on their contribution.
+## GitDAO mission
 
-In the future a Github user could login the DAO dashboard using only their Github account using zklogin.
+Create the necessary tools so any project can easily create any governance model they see fit.
 
+## Why GitDAO?
+
+FOSS projects require some sort of governance. Even with open source code, someone has to decide what features to approve, what pull requests to merge, etc. Historically if a large enough group of contributors disagreed with the original founder, they would fork the project and create a new one.
+
+Today many FOSS (free and open source software) projects are controlled by the original founders.
+
+So even thought the source code is open, the governance of the project is not. This can be a problem.
+
+I beleive governance of a FOSS project should be able to be more dynamic. It should evolve naturally and seemslessly with the project.
+
+FOSS projects have:
+
+* Assets: The code, the website, the domain, the social media accounts, the funds, etc.
+* Management: The governance of the project. Who can merge pull requests, who can approve features, who can decide what to do with the funds, etc.
+
+The assets are controlled by management. This management can be done by the project founders at the beginnig but as the project evolves this control may or may not need to change.
+
+We should also **have the option to be able to split the management of the project between the founders, contributors, owners or even users in whatever way they see fit**. There is no easy way to do this today.
+
+This couldn't be done before because the technology to do this didn't exist. To be fair, we may still not have all the pieces to do this but we are getting closer.
+
+## First example
+
+We are starting with a simple governance model.
+
+**Assets of the FOSS project to manage**: A git repository.
+
+**Governance model**: The effective control of the assets (in this case, just a repository) is given to the contributors of the project in the proportion of their contributions. 
 
 ## Architecture design
 
@@ -29,7 +57,7 @@ graph TD;
     NRWF -->|API| ADC
     ADC --> M3P
 
-    CPC[Contributor Points Calculator <br> Reads .daoContributors]
+    CPC[Contributor Points Calculator <br> Reads daoContributors.txt]
     CPC -->|Scheduled Runs| CChanges
     CChanges{Changes}
     CChanges -->|No| CPC
@@ -49,7 +77,16 @@ Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
 Note: We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transfered between users. So CPC will check the balance of all address linked to that user. (*pending to improve*)
 
 
-## How to use GitDAO's CPC
+## GitDAO's CPC
+
+GitDAO's CPC (Contributor's Points Calculator) is a tool that calculates the contribution of each member of a Git repository based on the lines of code they have written with a weighted score. (for example, comments are worth half a point).
+
+The goal of the CPC is to to calculate the contribution of each member to later give them a share of the DAO's tokens based on their contribution.
+
+In the future a Github user could login the DAO dashboard using only their Github account using zklogin.
+
+
+### How to use GitDAO's CPC
 
 Use with:
 
@@ -83,14 +120,14 @@ The idea is that the DAO is the owner of the repository. The `% of total points`
 
 This information will be refreshed every a certain period of time (for example, every month or every release) and the DAO will distribute the tokens to the contributors based on their contribution on the main branch.
 
-## Weighted Points
+### Weighted Points
 
-The points are calculated as follows:
+The formulta to calcute the points can be improved and is up for debate, but for now the points are calculated as follows:
 
 - 1 point for each line of code
 - 0.5 points for each line of commented code or line in a text file (txt and md files)
 
-# Steps to create a repository an give its ownership to a DAO
+## Steps to create a repository and give its ownership to a DAO
 
 1. Create a Github account for the DAO
 2. Create a repository or transfer an existing one to the DAO account
