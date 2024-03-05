@@ -1,6 +1,6 @@
 # gitdao
 
-*WORK IN PROGRESS - DESIGN STAGE*  
+*WORK IN PROGRESS - EARLY ALPHA STAGE - If you like the concept feel free to get in contact*  
 
 Gitdao allows contributors of a Git repository to be the owners of the repository using a DAO.
 
@@ -46,7 +46,6 @@ Design of the architecture of the system ([link to edit](https://mermaid.live/ed
 
 ```mermaid
 graph TD;
-graph TD;
     FE(Front End Form or API)
     Q1{New Repo?}
     NRWF[New Repo Web form]
@@ -72,7 +71,6 @@ graph TD;
 
     CPC -->|Reads| daoContributors
     daoContributors>"daoContributors.txt"]
-
 ```
 
 New contributors and therefore ownwer will come over the repository, so we need a way for Github users to link there public keys to that user. For this we would have to create a `daocontributors.txt` file in the root of the repository. This file will have a content like:
