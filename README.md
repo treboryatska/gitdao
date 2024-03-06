@@ -6,9 +6,29 @@ Gitdao allows contributors of a Git repository to be the owners of the repositor
 
 The goal is to extend this functionality so the the DAO can control all aspects of an open source project, including the repository, the website, the social media accounts, the domain, the CI/CD, the funding, the governance, etc.
 
-## GitDAO mission
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [GitDAO's Mission](#gitdaos-mission)
+- [Why GitDAO?](#why-gitdao)
+- [First example](#first-example)
+- [Architecture design](#architecture-design)
+- [Components](#components)
+  - [1. CPC](#1-cpc)
+    - [How to use CPC](#how-to-use-cpc)
+    - [Weighted Points](#weighted-points)
+  - [2. PAC](#2-pac)
+  - [3. Steps to create a repository and give its ownership to a DAO](#3-steps-to-create-a-repository-and-give-its-ownership-to-a-dao)
+- [Notes](#notes)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## GitDAO's Mission
 
 Create the necessary tools so any project can easily create any governance model they see fit.
+
+Decentralize the governance of FOSS projects.
 
 ## Why GitDAO?
 
@@ -18,7 +38,7 @@ Today many FOSS (free and open source software) projects are controlled by the o
 
 So even thought the source code is open, the governance of the project is not. This can be a problem.
 
-I beleive governance of a FOSS project should be able to be more dynamic. It should evolve naturally and seemslessly with the project.
+I beleive governance of a FOSS project should be able to be more dynamic. It should evolve naturally and seemslessly with the project as people come and go.
 
 FOSS projects have:
 
@@ -47,33 +67,33 @@ Design of the architecture of the system ([link to edit](https://mermaid.live/ed
 ```mermaid
 graph TD;
     FE(Front End Form or API)
-    Q1{New Repo?}
+    Q1{New git Repo?}
     NRWF[New Repo Web form]
-    ARC[[Automatic Repo Creator - ARC]]
-    ADC[[Automatic DAO Creator - ADC]]
+    ARC[["ARC <br> (Automatic Repo Creator)"]]
+    ADC[["ADC <br> (Automatic DAO Creator)"]]
     M3P[Manual 3rd parties ownership transfer]
-
     FE[Front End Form or API] --> Q1
     Q1 -->|Yes| NRWF
     Q1 -->|No| ARC
     ARC -->|API| ADC
     NRWF -->|API| ADC
     ADC --> M3P
+    ENDCPC("End CPC")
 
-    CPC[[Contributor Points Calculator]]
+    CPC[["CPC<br>(Contributor Points Calculator)"]]
     CPC -->|Scheduled Runs| CChanges
-    CChanges{Changes}
-    CChanges -->|No| CPC
-    CChanges -->|Yes| PointAdjustmentCalculator
-    PointAdjustmentCalculator[[Point Adjustment Calculator <br>calculates # of tokens to mint]]--> Mint
+    CChanges{Changes?}
+    CChanges -->|No| ENDCPC
+    CChanges -->|Yes| PAC
+    PAC[[" PAC <br>(Points Adjustment Calculator)<br>calculates # of tokens to mint"]]--> Mint
     Mint[Mint New tokens] --> Transfer
-    Transfer[Transfer New tokens]
-
+    Transfer[Transfer New tokens] --> ENDCPC
+    
     CPC -->|Reads| daoContributors
     daoContributors>"daoContributors.txt"]
 ```
 
-New contributors and therefore ownwer will come over the repository, so we need a way for Github users to link there public keys to that user. For this we would have to create a `daocontributors.txt` file in the root of the repository. This file will have a content like:
+New contributors and therefore ownwer will come over the repository, so we need a way for Github users to link there public keys to that user. For this we would have to create a `daoContributors.txt` file in the root of the repository. This file will have a content like:
 
 ```
 Min 0x327a12059118e599059f432f238B54090c5bDC2D
@@ -82,8 +102,9 @@ Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
 
 Note: We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transfered between users. So CPC will check the balance of all address linked to that user. (*pending to improve*)
 
+## Components
 
-## GitDAO's CPC
+### 1. CPC
 
 GitDAO's CPC (Contributor's Points Calculator) is a tool that calculates the contribution of each member of a Git repository based on the lines of code they have written with a weighted score. (for example, comments are worth half a point).
 
@@ -92,7 +113,7 @@ The goal of the CPC is to to calculate the contribution of each member to later 
 In the future a Github user could login the DAO dashboard using only their Github account using zklogin.
 
 
-### How to use GitDAO's CPC
+#### How to use CPC
 
 Use with:
 
@@ -120,20 +141,53 @@ leo          0x327a12059118e599059f432f238B54090c5bDC2D 0.20               97.26
 ZZ           0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4 0.01               2.74   
 ```
 
-
-
 The idea is that the DAO is the owner of the repository. The `% of total points` are the `%` of your ownership of the DAO.
 
 This information will be refreshed every a certain period of time (for example, every month or every release) and the DAO will distribute the tokens to the contributors based on their contribution on the main branch.
 
-### Weighted Points
+#### Weighted Points
 
 The formulta to calcute the points can be improved and is up for debate, but for now the points are calculated as follows:
 
 - 1 point for each line of code
 - 0.5 points for each line of commented code or line in a text file (txt and md files)
 
-## Steps to create a repository and give its ownership to a DAO
+Ideally one day the weight of the points will be decided by the DAO members.
+
+### 2. PAC
+
+GitDAO's PAC (Points Adjustment Calculator) is the tool that calculates the number of tokens to mint based on the CPC's output and the previosly minted tokens.
+
+Example: A DAO has 100 tokens and two owners, Bob with 40 tokens (40%) and Alice with 60 tokens (60%). Next time CPC is run, it calculates that Bob should have 45% of the points and Alice 55%, so PAC has to make the necessary adjustments to change the ownership of the DAO.
+
+To adjust the ownership percentages in the DAO to 45% for Bob and 55% for Alice, we need to calculate the number of new tokens to mint and how many of those tokens should go to each owner.
+
+Let's define:
+- $T$ as the total current tokens in the DAO, which in this example is 100.
+- $T_{new}$ as the total new tokens to be minted. We want to calculate this value.
+- $T_{total}$ as the total number of tokens after minting the new tokens, which is the sum of the current tokens and the new tokens.
+- $Uc_{i}$ as the current number of tokens user i owns. In this example, $U_{current}$ is 40 for Bob and 60 for Alice.
+- $Ue_{i}$ as the extra tokens to be given to User i. We want to calculate this value.
+
+We aim for Bob to own 45% of the total tokens and Alice to own 55% after minting the new tokens. We can express this as the following equations:
+
+Bob's new ownership percentage:
+$$\frac{B_{current} + B_{extra}}{T + T_{new}} = 0.45$$
+
+Alice's new ownership percentage:
+$$\frac{A_{current} + A_{extra}}{T + T_{new}} = 0.55$$
+
+Since the total number of new tokens $T_{new}$ is the sum of the extra tokens given to all users, in this case, Bob and Alice:
+
+$$T_{new} =\sum_{i=1}^n Ue_{i}$$
+$$T_{new} = B_{extra} + A_{extra}$$
+
+We can solve these equations to find the values of $B_{extra}$, $A_{extra}$, and $T_{new}$.
+
+To adjust the ownership percentages in the DAO to 45% for Bob and 55% for Alice by minting new tokens, we should mint a total of 33.33 new tokens, having a new total of 133.33 tokens. Distribute 20 of these new tokens to Bob, giving him a total of 60 tokens, which will be 45% of the new total. The remaining 13.33 new tokens should be distributed to Alice, giving her a total of 73.33 tokens, which will be 55% of the new total.
+
+
+### 3. Steps to create a repository and give its ownership to a DAO
 
 1. Create a Github account for the DAO
 2. Create a repository or transfer an existing one to the DAO account
@@ -166,3 +220,8 @@ One created you should see something like this:
 
     * Set Up a Server or Service: Deploy a server or service that listens for finalized proposals from your Aragon DAO. This can be done by interacting with the Aragon smart contracts or using Aragon's API if available.
     * Interact with GitHub API: Upon detecting a passed proposal relevant to GitHub repository management, the server would use the GitHub API to perform the specified actions. This requires the server to authenticate with GitHub using the DAO's GitHub account credentials (stored securely, potentially accessed via a multisig wallet).
+
+
+## Notes
+
+**DAO's email address:** The DAO will need an email address to create the Github account among other things. This email address should be controlled by the DAO. It' still up to debate which is the best way to do this.
