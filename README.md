@@ -222,6 +222,31 @@ One created you should see something like this:
     * Interact with GitHub API: Upon detecting a passed proposal relevant to GitHub repository management, the server would use the GitHub API to perform the specified actions. This requires the server to authenticate with GitHub using the DAO's GitHub account credentials (stored securely, potentially accessed via a multisig wallet).
 
 
+### 4. Complete history of the `daoContributors.txt` file
+
+We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transfered between users (*pending to improve*).
+
+We have the script [fullHistoryOfFile.sh](fullHistoryOfFile.sh) that will give us the full history of of the `daoContributors.txt` file in a git repository.
+
+So if your file today has:
+
+```
+Min 0x327a12059118e599059f432f238B54090c5bDC2D
+Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
+```
+
+But used to have:
+```
+Min 0x89c183cefd4cDc18525dF9ECaa82Cdac9C014271
+```
+
+The fullHistoryOfFile.sh will give you the following:
+```
+Min 0x327a12059118e599059f432f238B54090c5bDC2D
+Min 0x89c183cefd4cDc18525dF9ECaa82Cdac9C014271
+Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
+```
+
 ## Notes
 
 **DAO's email address:** The DAO will need an email address to create the Github account among other things. This email address should be controlled by the DAO. It' still up to debate which is the best way to do this.
