@@ -12,14 +12,16 @@ The goal is to extend this functionality so the the DAO can control all aspects 
 
 - [GitDAO's Mission](#gitdaos-mission)
 - [Why GitDAO?](#why-gitdao)
-- [First example](#first-example)
-- [Architecture design](#architecture-design)
+- [First proof of concept](#first-proof-of-concept)
+- [Architecture designs](#architecture-designs)
 - [Components](#components)
   - [1. CPC](#1-cpc)
     - [How to use CPC](#how-to-use-cpc)
     - [Weighted Points](#weighted-points)
-  - [2. PAC](#2-pac)
-  - [3. Steps to create a repository and give its ownership to a DAO](#3-steps-to-create-a-repository-and-give-its-ownership-to-a-dao)
+  - [2. CFR (Configuration File Reader)](#2-cfr-configuration-file-reader)
+    - [2.1 Complete history of the `daoContributors.txt` file](#21-complete-history-of-the-daocontributorstxt-file)
+  - [3. PAC (Points Adjustment Calculator)](#3-pac-points-adjustment-calculator)
+  - [4. Steps to create a repository and give its ownership to a DAO](#4-steps-to-create-a-repository-and-give-its-ownership-to-a-dao)
 - [Notes](#notes)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -38,14 +40,14 @@ Today many FOSS (free and open source software) projects are controlled by the o
 
 So even thought the source code is open, the governance of the project is not. This can be a problem.
 
-I beleive governance of a FOSS project should be able to be more dynamic. It should evolve naturally and seemslessly with the project as people come and go.
+I believe governance of a FOSS project should be able to be more dynamic. It should evolve naturally and seemslessly with the project as people come and go.
 
 FOSS projects have:
 
 * Assets: The code, the website, the domain, the social media accounts, the funds, etc.
 * Management: The governance of the project. Who can merge pull requests, who can approve features, who can decide what to do with the funds, etc.
 
-The assets are controlled by management. This management can be done by the project founders at the beginnig but as the project evolves this control may or may not need to change.
+The assets are controlled by management. This management can be done by the project founders at the beginning but as the project evolves this control may or may not need to change.
 
 We should also **have the option to be able to split the management of the project between the founders, contributors, owners or even users in whatever way they see fit**. There is no easy way to do this today.
 
@@ -100,14 +102,14 @@ graph TD;
     CFR -->|Verifies| daoContributors
 ```
 
-New contributors and therefore ownwer will come over the repository, so we need a way for Github users to link there public keys to that user. For this we would have to create a `daoContributors.txt` file in the root of the repository. This file will have a content like:
+New contributors and therefore owner will come over the repository, so we need a way for Github users to link there public keys to that user. For this we would have to create a `daoContributors.txt` file in the root of the repository. This file will have a content like:
 
 ```
 Min 0x327a12059118e599059f432f238B54090c5bDC2D
 Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
 ```
 
-Note1: We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transfered between users. So CPC will check the balance of all address linked to that user. (*pending to improve*)
+Note1: We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transferred between users. So CPC will check the balance of all address linked to that user. (*pending to improve*)
 
 Note2: When `daoContributions.txt` is read it should only consider an address of a user if it was written by the same user. This is to avoid someone adding someone else's address to the file.
 
@@ -172,7 +174,7 @@ Ideally one day the weight of the points will be decided by the DAO members.
 
 #### 2.1 Complete history of the `daoContributors.txt` file
 
-We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transfered between users (*pending to improve*).
+We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transferred between users (*pending to improve*).
 
 We have the script [fullHistoryOfFile.sh](fullHistoryOfFile.sh) that will give us the full history of of the `daoContributors.txt` file in a git repository.
 
@@ -197,7 +199,7 @@ Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
 
 ### 3. PAC (Points Adjustment Calculator)
 
-GitDAO's PAC (Points Adjustment Calculator) is the tool that calculates the number of tokens to mint based on the CPC's output and the previosly minted tokens.
+GitDAO's PAC (Points Adjustment Calculator) is the tool that calculates the number of tokens to mint based on the CPC's output and the previously minted tokens.
 
 Example: A DAO has 100 tokens and two owners, Bob with 40 tokens (40%) and Alice with 60 tokens (60%). Next time CPC is run, it calculates that Bob should have 45% of the points and Alice 55%, so PAC has to make the necessary adjustments to change the ownership of the DAO.
 
@@ -266,4 +268,4 @@ One created you should see something like this:
 
 **DAO's email address:** The DAO will need an email address to create the Github account among other things. This email address should be controlled by the DAO. It' still up to debate which is the best way to do this.
 
-**Contributions give you the initial mint rights of the DAO**, but not its continuence. This means that if today you made 10% of the contributions points, you will get 10% of the DAO's tokens. Once they are minted at your address, there is no further control over them. So, if you transfer them to someone else, you will efectively transfer the ownership of the DAO and the only way to recover them is if someone transfer you back the tokens. This is a feature, not a bug. Example: You have 1000 tokens that represent 10% of the DAO and you transfer 300 tokens to someone else. Let's say that in the next recalculation you made more contributions and you are entitled to 1200 total tokens. In this case the system will only transfer you 200.
+**Contributions give you the initial mint rights of the DAO**, but not its continuence. This means that if today you made 10% of the contributions points, you will get 10% of the DAO's tokens. Once they are minted at your address, there is no further control over them. So, if you transfer them to someone else, you will effectively transfer the ownership of the DAO and the only way to recover them is if someone transfer you back the tokens. This is a feature, not a bug. Example: You have 1000 tokens that represent 10% of the DAO and you transfer 300 tokens to someone else. Let's say that in the next recalculation you made more contributions and you are entitled to 1200 total tokens. In this case the system will only transfer you 200.
