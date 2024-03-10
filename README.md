@@ -235,7 +235,26 @@ We can solve these equations to find the values of $B_{extra}$, $A_{extra}$, and
 
 To adjust the ownership percentages in the DAO to 45% for Bob and 55% for Alice by minting new tokens, we should mint a total of 33.33 new tokens, having a new total of 133.33 tokens. Distribute 20 of these new tokens to Bob, giving him a total of 60 tokens, which will be 45% of the new total. The remaining 13.33 new tokens should be distributed to Alice, giving her a total of 73.33 tokens, which will be 55% of the new total.
 
-### 4. Steps to create a repository and give its ownership to a DAO
+### 4. Merge PRs authorization
+
+Flow when trying to merge a Pull Request to main branch:
+
+```mermaid
+graph TD;
+    A("Github Status checks before merging")
+    B("For git users that approved the PR, obtain linked EOA")
+    C("Call on-chain S.C. and:<br>1.Calculate % of DAO that approved this P.R.<br>2. Read % required for approval")
+    D{"Approved?"}
+   daoContributors>"daoContributors.txt"]
+    A --> B
+    B --> C
+    C --> D
+    D -->|No| BlockMerge
+    D -->|Yes| ApproveMerge
+    B --> |Verifies|daoContributors
+```
+
+### 5. Steps to create a repository and give its ownership to a DAO
 
 1. Create a Github account for the DAO
 2. Create a repository or transfer an existing one to the DAO account
