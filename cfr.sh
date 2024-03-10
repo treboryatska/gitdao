@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# CFR - Configurable File Reader
+
 # File name
 FILE="daoContributors.txt"
 # Temporary file to accumulate added lines
