@@ -51,7 +51,7 @@ We should also **have the option to be able to split the management of the proje
 
 This couldn't be done before because the technology to do this didn't exist. To be fair, we may still not have all the pieces to do this but we are getting closer.
 
-## First example
+## First proof of concept
 
 We are starting with a simple governance model.
 
@@ -59,10 +59,9 @@ We are starting with a simple governance model.
 
 **Governance model**: The effective control of the assets (in this case, just a repository) is given to the contributors of the project in the proportion of their contributions. 
 
-## Architecture design
+## Architecture designs
 
-
-Design of the architecture of the system ([link to edit](https://mermaid.live/edit#pako:eNp1Uk1vgzAM_StWdm136a2bOiHQpB3aVbRSNUEPKTGFDRKUD1UT7X9fEqBlU8eBOM_P9rPjlmSCIZmTo6RNAdvoKeVgv6Bd4QlibMTLpUNW8e41GUDY4QFyIet9T4_DJDBa1FSXWccIJVItJEydc6BFY1oUvI9Z0cBaztbJknJDK5hJBg2VukQF4sRRqqJsQEvKVY5yyArT6eL8gersRY7BlTi78leRHgzWb2dX7tbXHdgaDnViUt5B4TpMQsG1LA_GaV6LkmsFIa0yU_kung9yYbunTMEjo2JEVvtrDl9skxXITIUMYsOt8DAsKD-i6ln9re3Py2_42prNdsfjJ-HFBezTKF0j1zeRXcC_7sR74Ob6299wtcUeQOSgxRdyZQ-obeDez8wa_VNaK3E_cJvTUfd-rtv-DTvecEsGY8wnE1KjrGnJ7J62LiAlusAaUzK3JsOcmkqnJOUXS6V23JtvnpG5lgYnxDTMio1Kaje8JvOcVgovP9ja-RY)):
+Initial creation of the gitdao:
 
 ```mermaid
 graph TD;
@@ -78,19 +77,27 @@ graph TD;
     ARC -->|API| ADC
     NRWF -->|API| ADC
     ADC --> M3P
-    ENDCPC("End CPC")
+```
 
+
+Recalculation of the ownership of the project ([link to edit](https://mermaid.live/edit#pako:eNp1Uk1vgzAM_StWdm136a2bOiHQpB3aVbRSNUEPKTGFDRKUD1UT7X9fEqBlU8eBOM_P9rPjlmSCIZmTo6RNAdvoKeVgv6Bd4QlibMTLpUNW8e41GUDY4QFyIet9T4_DJDBa1FSXWccIJVItJEydc6BFY1oUvI9Z0cBaztbJknJDK5hJBg2VukQF4sRRqqJsQEvKVY5yyArT6eL8gersRY7BlTi78leRHgzWb2dX7tbXHdgaDnViUt5B4TpMQsG1LA_GaV6LkmsFIa0yU_kung9yYbunTMEjo2JEVvtrDl9skxXITIUMYsOt8DAsKD-i6ln9re3Py2_42prNdsfjJ-HFBezTKF0j1zeRXcC_7sR74Ob6299wtcUeQOSgxRdyZQ-obeDez8wa_VNaK3E_cJvTUfd-rtv-DTvecEsGY8wnE1KjrGnJ7J62LiAlusAaUzK3JsOcmkqnJOUXS6V23JtvnpG5lgYnxDTMio1Kaje8JvOcVgovP9ja-RY)):
+
+```mermaid
+graph TD;
+    ENDCPC("End CPC")
+    CFR[["CFR (Configuration File Reader)"]]
     CPC[["CPC<br>(Contributor Points Calculator)"]]
-    CPC -->|Scheduled Runs| CChanges
     CChanges{Changes?}
+    daoContributors>"daoContributors.txt"]
+
+    CFR --> CChanges
     CChanges -->|No| ENDCPC
     CChanges -->|Yes| PAC
     PAC[[" PAC <br>(Points Adjustment Calculator)<br>calculates # of tokens to mint"]]--> Mint
     Mint[Mint New tokens] --> Transfer
     Transfer[Transfer New tokens] --> ENDCPC
-    
-    CPC -->|Reads| daoContributors
-    daoContributors>"daoContributors.txt"]
+    CPC -->|Scheduled Runs| CFR
+    CFR -->|Verifies| daoContributors
 ```
 
 New contributors and therefore ownwer will come over the repository, so we need a way for Github users to link there public keys to that user. For this we would have to create a `daoContributors.txt` file in the root of the repository. This file will have a content like:
@@ -100,7 +107,9 @@ Min 0x327a12059118e599059f432f238B54090c5bDC2D
 Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
 ```
 
-Note: We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transfered between users. So CPC will check the balance of all address linked to that user. (*pending to improve*)
+Note1: We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transfered between users. So CPC will check the balance of all address linked to that user. (*pending to improve*)
+
+Note2: When `daoContributions.txt` is read it should only consider an address of a user if it was written by the same user. This is to avoid someone adding someone else's address to the file.
 
 ## Components
 
@@ -154,7 +163,39 @@ The formulta to calcute the points can be improved and is up for debate, but for
 
 Ideally one day the weight of the points will be decided by the DAO members.
 
-### 2. PAC
+### 2. CFR (Configuration File Reader)
+
+`daoContributors.txt` contains the list of contributors and their public keys. However this file cannot be read directly and has to be verified each time before use. This verification will:
+
+- Read the Complete git history of the `daoContributors.txt` file
+- Only consider an address of a user if it was written by the same user. If not ignore it.
+
+#### 2.1 Complete history of the `daoContributors.txt` file
+
+We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transfered between users (*pending to improve*).
+
+We have the script [fullHistoryOfFile.sh](fullHistoryOfFile.sh) that will give us the full history of of the `daoContributors.txt` file in a git repository.
+
+So if your file today has:
+
+```
+Min 0x327a12059118e599059f432f238B54090c5bDC2D
+Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
+```
+
+But used to have:
+```
+Min 0x89c183cefd4cDc18525dF9ECaa82Cdac9C014271
+```
+
+The fullHistoryOfFile.sh will give you the following:
+```
+Min 0x327a12059118e599059f432f238B54090c5bDC2D
+Min 0x89c183cefd4cDc18525dF9ECaa82Cdac9C014271
+Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
+```
+
+### 3. PAC (Points Adjustment Calculator)
 
 GitDAO's PAC (Points Adjustment Calculator) is the tool that calculates the number of tokens to mint based on the CPC's output and the previosly minted tokens.
 
@@ -187,7 +228,7 @@ We can solve these equations to find the values of $B_{extra}$, $A_{extra}$, and
 To adjust the ownership percentages in the DAO to 45% for Bob and 55% for Alice by minting new tokens, we should mint a total of 33.33 new tokens, having a new total of 133.33 tokens. Distribute 20 of these new tokens to Bob, giving him a total of 60 tokens, which will be 45% of the new total. The remaining 13.33 new tokens should be distributed to Alice, giving her a total of 73.33 tokens, which will be 55% of the new total.
 
 
-### 3. Steps to create a repository and give its ownership to a DAO
+### 4. Steps to create a repository and give its ownership to a DAO
 
 1. Create a Github account for the DAO
 2. Create a repository or transfer an existing one to the DAO account
@@ -221,32 +262,8 @@ One created you should see something like this:
     * Set Up a Server or Service: Deploy a server or service that listens for finalized proposals from your Aragon DAO. This can be done by interacting with the Aragon smart contracts or using Aragon's API if available.
     * Interact with GitHub API: Upon detecting a passed proposal relevant to GitHub repository management, the server would use the GitHub API to perform the specified actions. This requires the server to authenticate with GitHub using the DAO's GitHub account credentials (stored securely, potentially accessed via a multisig wallet).
 
-
-### 4. Complete history of the `daoContributors.txt` file
-
-We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transfered between users (*pending to improve*).
-
-We have the script [fullHistoryOfFile.sh](fullHistoryOfFile.sh) that will give us the full history of of the `daoContributors.txt` file in a git repository.
-
-So if your file today has:
-
-```
-Min 0x327a12059118e599059f432f238B54090c5bDC2D
-Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
-```
-
-But used to have:
-```
-Min 0x89c183cefd4cDc18525dF9ECaa82Cdac9C014271
-```
-
-The fullHistoryOfFile.sh will give you the following:
-```
-Min 0x327a12059118e599059f432f238B54090c5bDC2D
-Min 0x89c183cefd4cDc18525dF9ECaa82Cdac9C014271
-Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
-```
-
 ## Notes
 
 **DAO's email address:** The DAO will need an email address to create the Github account among other things. This email address should be controlled by the DAO. It' still up to debate which is the best way to do this.
+
+**Contributions give you the initial mint rights of the DAO**, but not its continuence. This means that if today you made 10% of the contributions points, you will get 10% of the DAO's tokens. Once they are minted at your address, there is no further control over them. So, if you transfer them to someone else, you will efectively transfer the ownership of the DAO and the only way to recover them is if someone transfer you back the tokens. This is a feature, not a bug. Example: You have 1000 tokens that represent 10% of the DAO and you transfer 300 tokens to someone else. Let's say that in the next recalculation you made more contributions and you are entitled to 1200 total tokens. In this case the system will only transfer you 200.
