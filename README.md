@@ -19,7 +19,8 @@ The goal is to extend this functionality so the the DAO can control all aspects 
     - [How to use CPC](#how-to-use-cpc)
     - [Weighted Points](#weighted-points)
   - [2. CFR (Configuration File Reader)](#2-cfr-configuration-file-reader)
-    - [2.1 Complete history of the `daoContributors.txt` file](#21-complete-history-of-the-daocontributorstxt-file)
+    - [2.1 CFR - Check 1 - Complete git history](#21-cfr---check-1---complete-git-history)
+    - [2.2 CFR - Check 2 - Verify ownership](#22-cfr---check-2---verify-ownership)
   - [3. PAC (Points Adjustment Calculator)](#3-pac-points-adjustment-calculator)
   - [4. Steps to create a repository and give its ownership to a DAO](#4-steps-to-create-a-repository-and-give-its-ownership-to-a-dao)
 - [Notes](#notes)
@@ -172,11 +173,11 @@ Ideally one day the weight of the points will be decided by the DAO members.
 - Read the Complete git history of the `daoContributors.txt` file
 - Only consider an address of a user if it was written by the same user. If not ignore it.
 
-#### 2.1 Complete history of the `daoContributors.txt` file
+#### 2.1 CFR - Check 1 - Complete git history
 
 We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transferred between users (*pending to improve*).
 
-We have the script [fullHistoryOfFile.sh](fullHistoryOfFile.sh) that will give us the full history of of the `daoContributors.txt` file in a git repository.
+We have the script [cfr.sh](cfr.sh) that will give us the full history of of the `daoContributors.txt` file in a git repository.
 
 So if your file today has:
 
@@ -190,12 +191,17 @@ But used to have:
 Min 0x89c183cefd4cDc18525dF9ECaa82Cdac9C014271
 ```
 
-The fullHistoryOfFile.sh will give you the following:
+The `cfr.sh` will give you the following:
 ```
 Min 0x327a12059118e599059f432f238B54090c5bDC2D
 Min 0x89c183cefd4cDc18525dF9ECaa82Cdac9C014271
 Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
 ```
+
+#### 2.2 CFR - Check 2 - Verify ownership
+
+When `daoContributors.txt` is read it should only consider an address of a user if it was written by the same user. This is to avoid someone adding someone else's address to the file.
+
 
 ### 3. PAC (Points Adjustment Calculator)
 
@@ -228,7 +234,6 @@ $$T_{new} = B_{extra} + A_{extra}$$
 We can solve these equations to find the values of $B_{extra}$, $A_{extra}$, and $T_{new}$.
 
 To adjust the ownership percentages in the DAO to 45% for Bob and 55% for Alice by minting new tokens, we should mint a total of 33.33 new tokens, having a new total of 133.33 tokens. Distribute 20 of these new tokens to Bob, giving him a total of 60 tokens, which will be 45% of the new total. The remaining 13.33 new tokens should be distributed to Alice, giving her a total of 73.33 tokens, which will be 55% of the new total.
-
 
 ### 4. Steps to create a repository and give its ownership to a DAO
 
