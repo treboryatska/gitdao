@@ -13,7 +13,12 @@ The goal is to extend this functionality so the the DAO can control all aspects 
 - [GitDAO's Mission](#gitdaos-mission)
 - [Why GitDAO?](#why-gitdao)
 - [First proof of concept](#first-proof-of-concept)
+- [Assumptions](#assumptions)
 - [Architecture designs](#architecture-designs)
+  - [1. Initial creation of the gitdao](#1-initial-creation-of-the-gitdao)
+  - [2. Linking the DAO to the repository](#2-linking-the-dao-to-the-repository)
+  - [3. Recalculation of the ownership of the project (link to edit):](#3-recalculation-of-the-ownership-of-the-project-link-to-edit)
+- [Configuration](#configuration)
 - [Components](#components)
   - [1. CPC](#1-cpc)
     - [How to use CPC](#how-to-use-cpc)
@@ -22,8 +27,8 @@ The goal is to extend this functionality so the the DAO can control all aspects 
     - [2.1 CFR - Check 1 - Complete git history](#21-cfr---check-1---complete-git-history)
     - [2.2 CFR - Check 2 - Verify ownership](#22-cfr---check-2---verify-ownership)
   - [3. PAC (Points Adjustment Calculator)](#3-pac-points-adjustment-calculator)
-  - [4. Steps to create a repository and give its ownership to a DAO](#4-steps-to-create-a-repository-and-give-its-ownership-to-a-dao)
-- [Notes](#notes)
+  - [4. Merge PRs authorization](#4-merge-prs-authorization)
+- [One way to create a repository and give its ownership to a DAO](#one-way-to-create-a-repository-and-give-its-ownership-to-a-dao)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -31,17 +36,20 @@ The goal is to extend this functionality so the the DAO can control all aspects 
 
 Create the necessary tools so any project can easily create any governance model they see fit.
 
-Decentralize the governance of FOSS projects.
+Decentralize the governance of FOSS projects in part or in full.
 
 ## Why GitDAO?
 
 FOSS projects require some sort of governance. Even with open source code, someone has to decide what features to approve, what pull requests to merge, etc. Historically if a large enough group of contributors disagreed with the original founder, they would fork the project and create a new one.
 
 Today many FOSS (free and open source software) projects are controlled by the original founders.
+So even thought the source code is open, the governance of the project is not. This may be ok for some projects but not necessarly for all.
 
-So even thought the source code is open, the governance of the project is not. This can be a problem.
+I believe governance of a FOSS project should be able to be more dynamic. It should have the option to be able to evolve naturally and seemslessly with the project as people come and go.
 
-I believe governance of a FOSS project should be able to be more dynamic. It should evolve naturally and seemslessly with the project as people come and go.
+We should also **have the option to be able to split the management of the project between the founders, contributors, owners or even users in whatever way they see fit**. There is no easy way to do this today.
+
+With GitDAO you could for example, set a fixed percentage ownership for the founders and a fixed percentage for the contributors. The part you assign to the contributors is continuosly been realocated between the contributors as the project evolves with the rules you define.
 
 FOSS projects have:
 
@@ -49,10 +57,6 @@ FOSS projects have:
 * Management: The governance of the project. Who can merge pull requests, who can approve features, who can decide what to do with the funds, etc.
 
 The assets are controlled by management. This management can be done by the project founders at the beginning but as the project evolves this control may or may not need to change.
-
-We should also **have the option to be able to split the management of the project between the founders, contributors, owners or even users in whatever way they see fit**. There is no easy way to do this today.
-
-This couldn't be done before because the technology to do this didn't exist. To be fair, we may still not have all the pieces to do this but we are getting closer.
 
 ## First proof of concept
 
@@ -62,9 +66,20 @@ We are starting with a simple governance model.
 
 **Governance model**: The effective control of the assets (in this case, just a repository) is given to the contributors of the project in the proportion of their contributions. 
 
+```mermaid
+graph LR;
+  A[DAO] -->|Ownership| B[Git Repository]
+```
+
+## Assumptions
+
+1. There is no reason why this couldn't work on any blockchain, but for current DAO support and low transactional fees we are strating with Polygon PoS.
+
+1. Contributions give you the initial mint rights of the DAO, but not its continuence. This means that if today you made 10% of the contributions points, you will get 10% of the DAO's tokens. Once they are minted at your address, there is no further control over them. So, if you transfer them to someone else, you will effectively transfer the ownership of the DAO and the only way to recover them is if someone transfer you back the tokens. This is a feature, not a bug. Example: You have 1000 tokens that represent 10% of the DAO and you transfer 300 tokens to someone else. Let's say that in the next recalculation you made more contributions and you are entitled to 1200 total tokens. In this case the system will only transfer you 200.
+
 ## Architecture designs
 
-Initial creation of the gitdao:
+### 1. Initial creation of the gitdao
 
 ```mermaid
 graph TD;
@@ -82,8 +97,23 @@ graph TD;
     ADC --> M3P
 ```
 
+### 2. Linking the DAO to the repository
 
-Recalculation of the ownership of the project ([link to edit](https://mermaid.live/edit#pako:eNp1Uk1vgzAM_StWdm136a2bOiHQpB3aVbRSNUEPKTGFDRKUD1UT7X9fEqBlU8eBOM_P9rPjlmSCIZmTo6RNAdvoKeVgv6Bd4QlibMTLpUNW8e41GUDY4QFyIet9T4_DJDBa1FSXWccIJVItJEydc6BFY1oUvI9Z0cBaztbJknJDK5hJBg2VukQF4sRRqqJsQEvKVY5yyArT6eL8gersRY7BlTi78leRHgzWb2dX7tbXHdgaDnViUt5B4TpMQsG1LA_GaV6LkmsFIa0yU_kung9yYbunTMEjo2JEVvtrDl9skxXITIUMYsOt8DAsKD-i6ln9re3Py2_42prNdsfjJ-HFBezTKF0j1zeRXcC_7sR74Ob6299wtcUeQOSgxRdyZQ-obeDez8wa_VNaK3E_cJvTUfd-rtv-DTvecEsGY8wnE1KjrGnJ7J62LiAlusAaUzK3JsOcmkqnJOUXS6V23JtvnpG5lgYnxDTMio1Kaje8JvOcVgovP9ja-RY)):
+The effective control of the assets (in this case, just a repository) is given by the control of the email address linked to the assets.
+
+The DAO will need an email address to create the Github account among other things. This email address should be controlled by the DAO. It' still up to debate which is the best way to do this.
+
+*this is a work in progress*
+
+```mermaid
+graph TD;
+  A("Create email address for the DAO")
+  B("Give access to the email address to selected DAO members")
+  C("Link email address to the Github account")
+
+```
+
+### 3. Recalculation of the ownership of the project ([link to edit](https://mermaid.live/edit#pako:eNp1Uk1vgzAM_StWdm136a2bOiHQpB3aVbRSNUEPKTGFDRKUD1UT7X9fEqBlU8eBOM_P9rPjlmSCIZmTo6RNAdvoKeVgv6Bd4QlibMTLpUNW8e41GUDY4QFyIet9T4_DJDBa1FSXWccIJVItJEydc6BFY1oUvI9Z0cBaztbJknJDK5hJBg2VukQF4sRRqqJsQEvKVY5yyArT6eL8gersRY7BlTi78leRHgzWb2dX7tbXHdgaDnViUt5B4TpMQsG1LA_GaV6LkmsFIa0yU_kung9yYbunTMEjo2JEVvtrDl9skxXITIUMYsOt8DAsKD-i6ln9re3Py2_42prNdsfjJ-HFBezTKF0j1zeRXcC_7sR74Ob6299wtcUeQOSgxRdyZQ-obeDez8wa_VNaK3E_cJvTUfd-rtv-DTvecEsGY8wnE1KjrGnJ7J62LiAlusAaUzK3JsOcmkqnJOUXS6V23JtvnpG5lgYnxDTMio1Kaje8JvOcVgovP9ja-RY)):
 
 ```mermaid
 graph TD;
@@ -103,16 +133,25 @@ graph TD;
     CFR -->|Verifies| daoContributors
 ```
 
-New contributors and therefore owner will come over the repository, so we need a way for Github users to link there public keys to that user. For this we would have to create a `daoContributors.txt` file in the root of the repository. This file will have a content like:
+New contributors and therefore owners will come over the repository, so we need a way for Github users to link there public keys to that user. For this we would have to create a `daoContributors.txt` file in the root of the repository. This file will have a content like:
 
 ```
 Min 0x327a12059118e599059f432f238B54090c5bDC2D
 Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
 ```
 
-Note1: We will have to look at all git history of this file, not just the last version of it, to avoid someone adding their public key and then removing it. Also tokens can be transferred between users. So CPC will check the balance of all address linked to that user. (*pending to improve*)
+## Configuration
 
-Note2: When `daoContributions.txt` is read it should only consider an address of a user if it was written by the same user. This is to avoid someone adding someone else's address to the file.
+The configuration of the DAO will be distributed among two sources:
+1. On-chain smart contracts
+2. Off-chain configuration file `daoContributors.txt`
+
+The on-chain smart contracts will contain the following information (among oth):
+- Governance model and rules
+- Frequency at which the CPC will run
+
+The off-chain configuration file `daoContributors.txt` will contain the following information:
+- The list of contributors that entered their EOA, with their respective EOA.
 
 ## Components
 
@@ -170,8 +209,8 @@ Ideally one day the weight of the points will be decided by the DAO members.
 
 `daoContributors.txt` contains the list of contributors and their public keys. However this file cannot be read directly and has to be verified each time before use. This verification will:
 
-- Read the Complete git history of the `daoContributors.txt` file
-- Only consider an address of a user if it was written by the same user. If not ignore it.
+1. Read the Complete git history of the `daoContributors.txt` file
+2. Only consider an address of a user if it was written by the same user. If not ignore it.
 
 #### 2.1 CFR - Check 1 - Complete git history
 
@@ -254,7 +293,7 @@ graph TD;
     B --> |Verifies|daoContributors
 ```
 
-### 5. Steps to create a repository and give its ownership to a DAO
+## One way to create a repository and give its ownership to a DAO
 
 1. Create a Github account for the DAO
 2. Create a repository or transfer an existing one to the DAO account
@@ -287,9 +326,3 @@ One created you should see something like this:
 
     * Set Up a Server or Service: Deploy a server or service that listens for finalized proposals from your Aragon DAO. This can be done by interacting with the Aragon smart contracts or using Aragon's API if available.
     * Interact with GitHub API: Upon detecting a passed proposal relevant to GitHub repository management, the server would use the GitHub API to perform the specified actions. This requires the server to authenticate with GitHub using the DAO's GitHub account credentials (stored securely, potentially accessed via a multisig wallet).
-
-## Notes
-
-**DAO's email address:** The DAO will need an email address to create the Github account among other things. This email address should be controlled by the DAO. It' still up to debate which is the best way to do this.
-
-**Contributions give you the initial mint rights of the DAO**, but not its continuence. This means that if today you made 10% of the contributions points, you will get 10% of the DAO's tokens. Once they are minted at your address, there is no further control over them. So, if you transfer them to someone else, you will effectively transfer the ownership of the DAO and the only way to recover them is if someone transfer you back the tokens. This is a feature, not a bug. Example: You have 1000 tokens that represent 10% of the DAO and you transfer 300 tokens to someone else. Let's say that in the next recalculation you made more contributions and you are entitled to 1200 total tokens. In this case the system will only transfer you 200.
