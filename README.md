@@ -77,6 +77,8 @@ graph LR;
 
 1. Contributions give you the initial mint rights of the DAO, but not its continuence. This means that if today you made 10% of the contributions points, you will get 10% of the DAO's tokens. Once they are minted at your address, there is no further control over them. So, if you transfer them to someone else, you will effectively transfer the ownership of the DAO and the only way to recover them is if someone transfer you back the tokens. This is a feature, not a bug. Example: You have 1000 tokens that represent 10% of the DAO and you transfer 300 tokens to someone else. Let's say that in the next recalculation you made more contributions and you are entitled to 1200 total tokens. In this case the system will only transfer you 200.
 
+1. Pull vs push approach. *Still under debate* 
+
 ## Architecture designs
 
 ### 1. Initial creation of the gitdao
@@ -139,6 +141,8 @@ New contributors and therefore owners will come over the repository, so we need 
 Min 0x327a12059118e599059f432f238B54090c5bDC2D
 Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
 ```
+
+An alternative to use a `daoContributors.txt` file can be to use a service like [Patchwallet](https://app.patchwallet.com/). This service allows a Github user to access a unique EOAs (Ethereum address) only they can access and is no custiodial. If the user wants to then move the tokens to another EOAS they can do so.
 
 ## Configuration
 
