@@ -77,7 +77,7 @@ graph LR;
 
 1. Contributions give you the initial mint rights of the DAO, but not its continuence. This means that if today you made 10% of the contributions points, you will get 10% of the DAO's tokens. Once they are minted at your address, there is no further control over them. So, if you transfer them to someone else, you will effectively transfer the ownership of the DAO and the only way to recover them is if someone transfer you back the tokens. This is a feature, not a bug. Example: You have 1000 tokens that represent 10% of the DAO and you transfer 300 tokens to someone else. Let's say that in the next recalculation you made more contributions and you are entitled to 1200 total tokens. In this case the system will only transfer you 200.
 
-1. Pull vs push approach. *Still under debate* 
+1. Pull vs push approach. *Still under debate - Should we send tokens to all contributors or only send them (or activate them) once they are requested*
 
 ## Architecture designs
 
@@ -144,13 +144,16 @@ Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
 
 An alternative to use a `daoContributors.txt` file can be to use a service like [Patchwallet](https://app.patchwallet.com/). This service allows a Github user to access a unique EOAs (Ethereum address) only they can access and is no custiodial. If the user wants to then move the tokens to another EOAS they can do so.
 
+Note: *Patchwallet officialy supports Github accounts but its not currently working.*
+
 ## Configuration
 
 The configuration of the DAO will be distributed among two sources:
-1. On-chain smart contracts
-2. Off-chain configuration file `daoContributors.txt`
+1. On-chain smart contracts for DAO management
+1. On-chain smart contracts for account abstraction
+1. Off-chain configuration file `daoContributors.txt`
 
-The on-chain smart contracts will contain the following information (among oth):
+The on-chain smart contracts will contain the following information (among others):
 - Governance model and rules
 - Frequency at which the CPC will run
 
@@ -246,6 +249,12 @@ Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
 When `daoContributors.txt` is read it should only consider an address of a user if it was written by the same user. This is to avoid someone adding someone else's address to the file.
 
 
+### 2. CFR (Configuration File Reader) ALTERNATIVE
+
+Instead of having a `daoContributors.txt` we can instead use the deterministic non-custidial address that is generated from the Github username.
+
+Using [Privy](https://www.privi.io) or [Stackup](https://www.stackup.sh) we would calculate the wallet of all contributors.
+
 ### 3. PAC (Points Adjustment Calculator)
 
 GitDAO's PAC (Points Adjustment Calculator) is the tool that calculates the number of tokens to mint based on the CPC's output and the previously minted tokens.
@@ -296,6 +305,28 @@ graph TD;
     D -->|Yes| ApproveMerge
     B --> |Verifies|daoContributors
 ```
+
+### 4.1 Github merge approval
+
+We will need to congigure the requirement for approvals from certain users for merges into the main branch via the [GitHub REST API](https://docs.github.com/en/rest).
+
+Using the GitHub REST API to create or update branch protection rules, we can include requiring pull request reviews before merging.
+
+To create or update a branch protection rule, we'll need to have admin permissions or a custom role with the "edit repository rules" permission for the repository. The API allows us to enforce various workflows for one or more branches, such as requiring an approving review or passing status checks for all pull requests merged into the protected branch​.
+
+When updating branch protection settings through the API, passing new arrays of users and teams will replace their previous values​.
+​
+
+## Fees
+
+Interacting with the blockchain will require paying fees to the network.
+
+For this, we propose that the DAO will sponsor any fees required to interact with it acting s a Paymaster.
+
+## Account abstraction
+
+ERC-4337 account addresses are deterministic, so the actual deployment of the contract on the blockchain is not necessary to know the account's address.
+
 
 ## One way to create a repository and give its ownership to a DAO
 
