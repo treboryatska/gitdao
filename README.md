@@ -71,13 +71,9 @@ graph LR;
   A[DAO] -->|Ownership| B[Git Repository]
 ```
 
-## Assumptions
-
-1. There is no reason why this couldn't work on any blockchain, but for current DAO support and low transactional fees we are strating with Polygon PoS.
+## Methodology
 
 1. Contributions give you the initial mint rights of the DAO, but not its continuence. This means that if today you made 10% of the contributions points, you will get 10% of the DAO's tokens. Once they are minted at your address, there is no further control over them. So, if you transfer them to someone else, you will effectively transfer the ownership of the DAO and the only way to recover them is if someone transfer you back the tokens. This is a feature, not a bug. Example: You have 1000 tokens that represent 10% of the DAO and you transfer 300 tokens to someone else. Let's say that in the next recalculation you made more contributions and you are entitled to 1200 total tokens. In this case the system will only transfer you 200.
-
-1. Pull vs push approach. *Still under debate - Should we send tokens to all contributors or only send them (or activate them) once they are requested*
 
 ## Architecture designs
 
@@ -159,6 +155,9 @@ The on-chain smart contracts will contain the following information (among other
 
 The off-chain configuration file `daoContributors.txt` will contain the following information:
 - The list of contributors that entered their EOA, with their respective EOA.
+
+Onchain components:
+The gitDAO's initial formation requires onchain deployment of governance contracts. Initially, we are using the Aragon framework to accomplish this step. In order to minimize costs, the gitDAO POC will be built out on Polygon PoS. The gitDAO framework can work with any blockchain, however. 
 
 ## Components
 
@@ -361,3 +360,6 @@ One created you should see something like this:
 
     * Set Up a Server or Service: Deploy a server or service that listens for finalized proposals from your Aragon DAO. This can be done by interacting with the Aragon smart contracts or using Aragon's API if available.
     * Interact with GitHub API: Upon detecting a passed proposal relevant to GitHub repository management, the server would use the GitHub API to perform the specified actions. This requires the server to authenticate with GitHub using the DAO's GitHub account credentials (stored securely, potentially accessed via a multisig wallet).
+   
+## Questions
+1. Pull vs push approach? *Still under debate - Should we send tokens to all contributors or only send them (or activate them) once they are requested?*
