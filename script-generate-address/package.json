@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "ethers": "^6.11.1",
+    "userop": "^0.3.8"
+  }
+}
