@@ -1,2 +1,1 @@
-/js/node_modules
-/script-generate-address/node_modules
+**/node_modules/

@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+      "resolveJsonModule": true,
+      //resolveJsonModule requires module to be commonjs, amd, umd, system, es2015, es2020 or esnext.
+      "module":"CommonJS"
+    },
+}
