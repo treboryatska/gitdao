@@ -13,11 +13,14 @@ The goal is to extend this functionality so the the DAO can control all aspects 
 - [GitDAO's Mission](#gitdaos-mission)
 - [Why GitDAO?](#why-gitdao)
 - [First proof of concept](#first-proof-of-concept)
-- [Assumptions](#assumptions)
+- [Methodology](#methodology)
 - [Architecture designs](#architecture-designs)
   - [1. Initial creation of the gitdao](#1-initial-creation-of-the-gitdao)
   - [2. Linking the DAO to the repository](#2-linking-the-dao-to-the-repository)
-  - [3. Recalculation of the ownership of the project (link to edit):](#3-recalculation-of-the-ownership-of-the-project-link-to-edit)
+  - [3. Re-ownership of the project (link to edit):](#3-re-ownership-of-the-project-link-to-edit)
+  - [4. LInking github users to wallets](#4-linking-github-users-to-wallets)
+    - [Option 1. Using a `daoContributors.txt` file](#option-1-using-a-daocontributorstxt-file)
+    - [Option 2. Using a deterministic non-custodial address](#option-2-using-a-deterministic-non-custodial-address)
 - [Configuration](#configuration)
 - [Components](#components)
   - [1. CPC](#1-cpc)
@@ -26,9 +29,14 @@ The goal is to extend this functionality so the the DAO can control all aspects 
   - [2. CFR (Configuration File Reader)](#2-cfr-configuration-file-reader)
     - [2.1 CFR - Check 1 - Complete git history](#21-cfr---check-1---complete-git-history)
     - [2.2 CFR - Check 2 - Verify ownership](#22-cfr---check-2---verify-ownership)
+  - [2. CFR (Configuration File Reader) ALTERNATIVE](#2-cfr-configuration-file-reader-alternative)
   - [3. PAC (Points Adjustment Calculator)](#3-pac-points-adjustment-calculator)
   - [4. Merge PRs authorization](#4-merge-prs-authorization)
+    - [4.1 Github merge approval](#41-github-merge-approval)
+- [Fees](#fees)
+- [Account abstraction](#account-abstraction)
 - [One way to create a repository and give its ownership to a DAO](#one-way-to-create-a-repository-and-give-its-ownership-to-a-dao)
+- [Questions](#questions)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -111,25 +119,33 @@ graph TD;
 
 ```
 
-### 3. Recalculation of the ownership of the project ([link to edit](https://mermaid.live/edit#pako:eNp1Uk1vgzAM_StWdm136a2bOiHQpB3aVbRSNUEPKTGFDRKUD1UT7X9fEqBlU8eBOM_P9rPjlmSCIZmTo6RNAdvoKeVgv6Bd4QlibMTLpUNW8e41GUDY4QFyIet9T4_DJDBa1FSXWccIJVItJEydc6BFY1oUvI9Z0cBaztbJknJDK5hJBg2VukQF4sRRqqJsQEvKVY5yyArT6eL8gersRY7BlTi78leRHgzWb2dX7tbXHdgaDnViUt5B4TpMQsG1LA_GaV6LkmsFIa0yU_kung9yYbunTMEjo2JEVvtrDl9skxXITIUMYsOt8DAsKD-i6ln9re3Py2_42prNdsfjJ-HFBezTKF0j1zeRXcC_7sR74Ob6299wtcUeQOSgxRdyZQ-obeDez8wa_VNaK3E_cJvTUfd-rtv-DTvecEsGY8wnE1KjrGnJ7J62LiAlusAaUzK3JsOcmkqnJOUXS6V23JtvnpG5lgYnxDTMio1Kaje8JvOcVgovP9ja-RY)):
+### 3. Re-ownership of the project ([link to edit](https://mermaid.live/edit#pako:eNpVUsFuwjAM_RUru4AEP8AmEJRxGhNi22E0HELj0mxtgpJ0aAL-fU6IGK3U2LHfi50Xn1hhJLIR21txqOB9_sg10Jct1nnOGRnoZUaXat9a4ZXRsFA1whqFRNvnbLtN-FUW8avsaWfHgeKt2rXeWFgZpb2DTNRFWwuK3NOySug9ulOyk8s1vgmHfRyk8AhLtHuEWjXKu3_ms5Y9-vtcX_fTE2dXpNLQCFp2VuiimnCWzpwR4kU4DxaH5qjRukodwPygDS171SD4yqKrTC3vWDAcjuH8as6hZCf2ie4cLp4auMVmN0kijjS8aXoNpMt2JQipbplOJhZbTVMxcoJCwUIUPIk8lV-t8w1qf693QBRpS8c9gCnBm2_Ujgw0xAy6htaWwY8VgpfnYQWhJXgS05VoQeMxcbfbeJtNerG4ib2zAWvQ0htImqtTSHPmK2yQsxG5EkvR1lSS6wtBBQ3J268u2MjbFgesja8-V4ImsmGjUtQOL3-K19gS)):
 
 ```mermaid
 graph TD;
-    ENDCPC("End CPC")
     CFR[["CFR (Configuration File Reader)"]]
     CPC[["CPC<br>(Contributor Points Calculator)"]]
     CChanges{Changes?}
-    daoContributors>"daoContributors.txt"]
+    Z[["Update Merge limits"]]
+    End(End)
 
+    A["<b>Trigger re-ownership</b><br><i> For example: Merge in main branch or Release</i>"]
+    B{"Last re-ownership over<br>time threshold?"}
+    B --> |No| End
+    B --> |Yes| CPC
+    A--> B
+    CPC --> CFR
     CFR --> CChanges
-    CChanges -->|No| ENDCPC
+    CChanges -->|No| End
     CChanges -->|Yes| PAC
     PAC[[" PAC <br>(Points Adjustment Calculator)<br>calculates # of tokens to mint"]]--> Mint
-    Mint[Mint New tokens] --> Transfer
-    Transfer[Transfer New tokens] --> ENDCPC
-    CPC -->|Scheduled Runs| CFR
-    CFR -->|Verifies| daoContributors
+    Mint[[Mint and transfer new tokens]] --> Z
+    Z --> End
 ```
+
+### 4. LInking github users to wallets
+
+#### Option 1. Using a `daoContributors.txt` file
 
 New contributors and therefore owners will come over the repository, so we need a way for Github users to link there public keys to that user. For this we would have to create a `daoContributors.txt` file in the root of the repository. This file will have a content like:
 
@@ -137,6 +153,8 @@ New contributors and therefore owners will come over the repository, so we need 
 Min 0x327a12059118e599059f432f238B54090c5bDC2D
 Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
 ```
+
+#### Option 2. Using a deterministic non-custodial address
 
 An alternative to use a `daoContributors.txt` file can be to use a service like [Patchwallet](https://app.patchwallet.com/). This service allows a Github user to access a unique EOAs (Ethereum address) only they can access and is no custiodial. If the user wants to then move the tokens to another EOAS they can do so.
 
@@ -168,7 +186,6 @@ GitDAO's CPC (Contributor's Points Calculator) is a tool that calculates the con
 The goal of the CPC is to to calculate the contribution of each member to later give them a share of the DAO's tokens based on their contribution.
 
 In the future a Github user could login the DAO dashboard using only their Github account using zklogin.
-
 
 #### How to use CPC
 
@@ -294,7 +311,7 @@ Flow when trying to merge a Pull Request to main branch:
 graph TD;
     A("Github Status checks before merging")
     B("For git users that approved the PR, obtain linked EOA")
-    C("Call on-chain S.C. and:<br>1.Calculate % of DAO that approved this P.R.<br>2. Read % required for approval")
+    C("Call DAO to<br>1.Calculate % of DAO that approved this P.R.<br>2. Read % required for approval")
     D{"Approved?"}
    daoContributors>"daoContributors.txt"]
     A --> B
@@ -305,7 +322,9 @@ graph TD;
     B --> |Verifies|daoContributors
 ```
 
-### 4.1 Github merge approval
+Note: The "% required for approval" should be stored where?
+
+#### 4.1 Github merge approval
 
 We will need to congigure the requirement for approvals from certain users for merges into the main branch via the [GitHub REST API](https://docs.github.com/en/rest).
 
@@ -315,17 +334,22 @@ To create or update a branch protection rule, we'll need to have admin permissio
 
 When updating branch protection settings through the API, passing new arrays of users and teams will replace their previous values​.
 ​
+```mermaid
+graph TD;
+    A("Github merge approval update")
+```
+
+A component we can call "Github merge approval update" will be in charge of updating the branch protection rules through the GitHub REST API.
 
 ## Fees
 
 Interacting with the blockchain will require paying fees to the network.
 
-For this, we propose that the DAO will sponsor any fees required to interact with it acting s a Paymaster.
+For this, we propose that the DAO will sponsor any fees required to interact with it acting as a Paymaster.
 
 ## Account abstraction
 
 ERC-4337 account addresses are deterministic, so the actual deployment of the contract on the blockchain is not necessary to know the account's address.
-
 
 ## One way to create a repository and give its ownership to a DAO
 
