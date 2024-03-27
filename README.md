@@ -2,6 +2,8 @@
 
 *WORK IN PROGRESS - EARLY ALPHA STAGE - If you like the concept feel free to get in contact*  
 
+Gitdao allows contributors of a Git repository to be the owners of the repository using a DAO.
+
 Today, developers have little control of the roadmaps they contribute to, and no control of the project's assets, such as the code repository, website, social media content accounts, domains and licensing, and funding.
 
 Gitdao is an objective framework that enables real project stewardship and asset ownership for developers providing real contributions.
