@@ -20,7 +20,7 @@ The goal is to extend this functionality so the the DAO can control all aspects 
   - [3. Re-ownership of the project (link to edit):](#3-re-ownership-of-the-project-link-to-edit)
   - [4. LInking github users to wallets](#4-linking-github-users-to-wallets)
     - [Option 1. Using a `daoContributors.txt` file](#option-1-using-a-daocontributorstxt-file)
-      - [Option 2. Using a deterministic non-custodial address](#option-2-using-a-deterministic-non-custodial-address)
+    - [Option 2. Using a deterministic non-custodial address](#option-2-using-a-deterministic-non-custodial-address)
 - [Configuration](#configuration)
 - [Components](#components)
   - [1. CPC](#1-cpc)
@@ -32,7 +32,7 @@ The goal is to extend this functionality so the the DAO can control all aspects 
   - [2. CFR (Configuration File Reader) ALTERNATIVE](#2-cfr-configuration-file-reader-alternative)
   - [3. PAC (Points Adjustment Calculator)](#3-pac-points-adjustment-calculator)
   - [4. Merge PRs authorization](#4-merge-prs-authorization)
-  - [4.1 Github merge approval](#41-github-merge-approval)
+    - [4.1 Github merge approval](#41-github-merge-approval)
 - [Fees](#fees)
 - [Account abstraction](#account-abstraction)
 - [One way to create a repository and give its ownership to a DAO](#one-way-to-create-a-repository-and-give-its-ownership-to-a-dao)
@@ -129,11 +129,11 @@ graph TD;
     Z[["Update Merge limits"]]
     End(End)
 
-    A{"Merge in main branch?"}
+    A["<b>Trigger re-ownership</b><br><i> For example: Merge in main branch or Release</i>"]
     B{"Last re-ownership over<br>time threshold?"}
     B --> |No| End
     B --> |Yes| CPC
-    A--> |Yes|B
+    A--> B
     CPC --> CFR
     CFR --> CChanges
     CChanges -->|No| End
@@ -154,7 +154,7 @@ Min 0x327a12059118e599059f432f238B54090c5bDC2D
 Idr 0x2574806fD47E49A53dC2bB0b5f5c12Ecb445CDa4
 ```
 
-##### Option 2. Using a deterministic non-custodial address
+#### Option 2. Using a deterministic non-custodial address
 
 An alternative to use a `daoContributors.txt` file can be to use a service like [Patchwallet](https://app.patchwallet.com/). This service allows a Github user to access a unique EOAs (Ethereum address) only they can access and is no custiodial. If the user wants to then move the tokens to another EOAS they can do so.
 
@@ -324,7 +324,7 @@ graph TD;
 
 Note: The "% required for approval" should be stored where?
 
-### 4.1 Github merge approval
+#### 4.1 Github merge approval
 
 We will need to congigure the requirement for approvals from certain users for merges into the main branch via the [GitHub REST API](https://docs.github.com/en/rest).
 
@@ -345,7 +345,7 @@ A component we can call "Github merge approval update" will be in charge of upda
 
 Interacting with the blockchain will require paying fees to the network.
 
-For this, we propose that the DAO will sponsor any fees required to interact with it acting s a Paymaster.
+For this, we propose that the DAO will sponsor any fees required to interact with it acting as a Paymaster.
 
 ## Account abstraction
 
