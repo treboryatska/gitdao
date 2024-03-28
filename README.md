@@ -44,7 +44,7 @@ Gitdao is an objective framework that enables real project stewardship and asset
 
 ## GitDAO's Mission
 
-Create objective tools any project can use to easily assign project ownership to contributors.
+Create the necessary tools so any project can easily create any governance model they see fit.
 
 Enable decentralized and credibly neutral governance models for free and open source software (FOSS) projects.
 
