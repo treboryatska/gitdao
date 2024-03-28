@@ -4,7 +4,9 @@
 
 Gitdao allows contributors of a Git repository to be the owners of the repository using a DAO.
 
-The goal is to extend this functionality so the the DAO can control all aspects of an open source project, including the repository, the website, the social media accounts, the domain, the CI/CD, the funding, the governance, etc.
+Today, developers have little control of the roadmaps they contribute to, and no control of the project's assets, such as the code repository, website, social media content accounts, domains and licensing, and funding.
+
+Gitdao is an objective framework that enables real project stewardship and asset ownership for developers providing real contributions.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -42,29 +44,19 @@ The goal is to extend this functionality so the the DAO can control all aspects 
 
 ## GitDAO's Mission
 
-Create the necessary tools so any project can easily create any governance model they see fit.
+Create objective tools any project can use to easily assign project ownership to contributors.
 
-Decentralize the governance of FOSS projects in part or in full.
+Enable decentralized and credibly neutral governance models for free and open source software (FOSS) projects.
 
 ## Why GitDAO?
 
-FOSS projects require some sort of governance. Even with open source code, someone has to decide what features to approve, what pull requests to merge, etc. Historically if a large enough group of contributors disagreed with the original founder, they would fork the project and create a new one.
+Gitdao allows open projects to **split project stewardship between the founders, contributors, and owners in whatever way they see fit**. 
 
-Today many FOSS (free and open source software) projects are controlled by the original founders.
-So even thought the source code is open, the governance of the project is not. This may be ok for some projects but not necessarly for all.
+Today, FOSS projects are controlled by the founders who decide roadmap features and their priority, and retain full ownership of the project's assets. This may work in some cases, but it fails to properly align incentives between the open project and its most important asset--a diverse community of developers. Although the source code is open, the governance of the project is not. Historically if a large enough group of contributors disagreed with the original founders, they would fork the project and create a new one. This imposes real time and money switching costs on developers and users.
 
-I believe governance of a FOSS project should be able to be more dynamic. It should have the option to be able to evolve naturally and seemslessly with the project as people come and go.
+FOSS project governance should be more dynamic. It should evolve naturally and seemslessly with the project as people come and go.
 
-We should also **have the option to be able to split the management of the project between the founders, contributors, owners or even users in whatever way they see fit**. There is no easy way to do this today.
-
-With GitDAO you could for example, set a fixed percentage ownership for the founders and a fixed percentage for the contributors. The part you assign to the contributors is continuosly been realocated between the contributors as the project evolves with the rules you define.
-
-FOSS projects have:
-
-* Assets: The code, the website, the domain, the social media accounts, the funds, etc.
-* Management: The governance of the project. Who can merge pull requests, who can approve features, who can decide what to do with the funds, etc.
-
-The assets are controlled by management. This management can be done by the project founders at the beginning but as the project evolves this control may or may not need to change.
+With GitDAO, you can set predefined governance rules for the founders and contributors. This allows governance control percentages to be realocated as the project grows and evolves.
 
 ## First proof of concept
 
@@ -332,8 +324,8 @@ Using the GitHub REST API to create or update branch protection rules, we can in
 
 To create or update a branch protection rule, we'll need to have admin permissions or a custom role with the "edit repository rules" permission for the repository. The API allows us to enforce various workflows for one or more branches, such as requiring an approving review or passing status checks for all pull requests merged into the protected branch​.
 
-When updating branch protection settings through the API, passing new arrays of users and teams will replace their previous values​.
-​
+When updating branch protection settings through the API, passing new arrays of users and teams will replace their previous values.
+
 ```mermaid
 graph TD;
     A("Github merge approval update")
@@ -384,6 +376,3 @@ One created you should see something like this:
 
     * Set Up a Server or Service: Deploy a server or service that listens for finalized proposals from your Aragon DAO. This can be done by interacting with the Aragon smart contracts or using Aragon's API if available.
     * Interact with GitHub API: Upon detecting a passed proposal relevant to GitHub repository management, the server would use the GitHub API to perform the specified actions. This requires the server to authenticate with GitHub using the DAO's GitHub account credentials (stored securely, potentially accessed via a multisig wallet).
-   
-## Questions
-1. Pull vs push approach? *Still under debate - Should we send tokens to all contributors or only send them (or activate them) once they are requested?*
